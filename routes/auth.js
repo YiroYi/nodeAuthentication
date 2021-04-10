@@ -15,17 +15,24 @@ router.post(
   '/signup',
   [
     check('email')
-    .isEmail()
-    .withMessage('Please enter a valid mail.')
-    .custom((value, {req}) => {
-      if(value === 'test1@test.com') {
-        throw new Error('This email address is forbidden')
-      }
-      return true
-    }),
+      .isEmail()
+      .withMessage('Please enter a valid mail.')
+      .custom((value, {req}) => {
+        if(value === 'test1@test.com') {
+          throw new Error('This email address is forbidden')
+        }
+        return true;
+      }),
     body('password', 'Please add 5 length password')
-    .isLength({min: 5})
-    .isAlphanumeric()
+      .isLength({min: 5})
+      .isAlphanumeric(),
+    body('confirmPassword')
+      .custom((value, { req }) => {
+        if(value !== req.body.password) {
+          throw new Error('Password has to match');
+        }
+        return true;
+      })
   ],
   authController.postSignup
 );
