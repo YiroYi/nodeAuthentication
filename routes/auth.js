@@ -12,7 +12,18 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
 
-router.post('/login', authController.postLogin);
+router.post('/login',
+            [
+              body('email')
+                .isEmail()
+                .withMessage('Please enter a valie email address')
+                .normalizeEmail(),
+              body('password', 'INVALID PASSWORD')
+                .isLength({ min: 5})
+                .isAlphanumeric()
+                .trim()
+            ],
+            authController.postLogin);
 
 router.post(
   '/signup',
@@ -31,10 +42,12 @@ router.post(
               return Promise.reject('E-mail has already used');
             }
         })
-      }),
+      })
+      .normalizeEmail(),
     body('password', 'Please add 5 length password')
       .isLength({min: 5})
-      .isAlphanumeric(),
+      .isAlphanumeric()
+      .trim(),
     body('confirmPassword')
       .custom((value, { req }) => {
         if(value !== req.body.password) {
@@ -42,6 +55,7 @@ router.post(
         }
         return true;
       })
+      .trim()
   ],
   authController.postSignup
 );
